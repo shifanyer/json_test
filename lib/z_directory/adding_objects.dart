@@ -50,6 +50,7 @@ class _PageRendererState extends State<PageRenderer>
   double radius;
   Way way1;
   List<Way> choreographer = [];
+  List<Point3D> deleteThisShit;
 
   List<List<ZShape>> objects = [];
   Map scores;
@@ -76,6 +77,8 @@ class _PageRendererState extends State<PageRenderer>
     var data = widget.data;
 //    print (data["pictures"][0]["objects"]["figures"][0]["windows"][0][0]["x"].toString());
 //    print(300);
+
+    List<Point3D> input;
 
     for (int i = 0; i < 4; i++) {
       A = Point3D(
@@ -138,7 +141,11 @@ class _PageRendererState extends State<PageRenderer>
             200,
         5);
     //D = Point3D(data["pictures"][0]["objects"]["figures"][0]["triangles"][0][3]["x"] * 1.0, data["pictures"][0]["objects"]["figures"][0]["triangles"][0][3]["y"] * 1.0, 0);
-    corners.add(fourPoints(A, B, C, A));
+
+    deleteThisShit.add(A);
+    deleteThisShit.add(B);
+    deleteThisShit.add(C);
+    //corners.add();
 
 
 //    I = Point3D(0, 0, -100);
@@ -254,8 +261,10 @@ class _PageRendererState extends State<PageRenderer>
 
                                       way1 = choreographer[0];
 
+                                      shapeList.addAll(Shapes()
+                                          .quadrilateralPoints(deleteThisShit));
                                       //print(scores["width"]);
-
+/*
                                       shapeList.addAll(Shapes()
                                           .quadrilateralPoints(corners[0]));
                                       shapeList.addAll(Shapes()
@@ -266,6 +275,8 @@ class _PageRendererState extends State<PageRenderer>
                                           .quadrilateralPoints(corners[3]));
                                       shapeList.addAll(Shapes()
                                           .quadrilateralPoints(corners[4]));
+
+ */
 //                                      shapeList.addAll(Shapes().tetrahedronFull(I,
 //                                        a: 50,
 //                                        scenario: value,

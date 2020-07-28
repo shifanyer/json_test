@@ -25,7 +25,7 @@ class Shapes {
     return planes;
   }
 
-  List <ZShape> quadrilateralPoints ( fourPoints FOUR, /*Point3D A, Point3D B, Point3D C, Point3D D,*/ {bool filling = false,
+  List <ZShape> quadrilateralPoints ( List<Point3D> dots, /*Point3D A, Point3D B, Point3D C, Point3D D,*/ {bool filling = false,
     double scenario = 0,
     //double up = 0, double right = 0, double forward = 0, double radius = 0
     Way w,
@@ -37,10 +37,8 @@ class Shapes {
 
   }){
 
-    Point3D A = FOUR.A;
-    Point3D B = FOUR.B;
-    Point3D C = FOUR.C;
-    Point3D D = FOUR.D;
+
+
 
     w = w ?? Way(up: 0, right: 0, forward: 0, radius: 0, coef: 0);
 
@@ -55,7 +53,21 @@ class Shapes {
     double Y = - up * scenario - radius * sin(2 * pi * scenario);
     double Z = forward * scenario;
 
-    med = med ?? Point3D((A.x + B.x + C.x + D.x) / 4, (A.y + B.y + C.y + D.y) / 4, (A.z + B.z + C.z + D.z) / 4);
+    double tmpX;
+    double tmpY;
+    double tmpZ;
+
+
+    int dotsCount = dots.length;
+
+    for (int i = 0; i < dotsCount; i++){
+       tmpX += dots[i].x;
+       tmpY += dots[i].x;
+       tmpZ += dots[i].x;
+    }
+
+
+    med = med ?? Point3D((tmpX) / dotsCount, (tmpY) / dotsCount, (tmpZ) / dotsCount);
 
     double medX = X + med.x;
     double medY = Y + med.y;
@@ -72,33 +84,26 @@ class Shapes {
       axisZ = axisZ * 2 * pi / 360;
     }
 
-    double AX = (A.x + X) - medX;
-    double BX = (B.x + X) - medX;
-    double CX = (C.x + X) - medX;
-    double DX = (D.x + X) - medX;
-    double AY = (A.y + Y) - medY;
-    double BY = (B.y + Y) - medY;
-    double CY = (C.y + Y) - medY;
-    double DY = (D.y + Y) - medY;
-    double AZ = (A.z + Z) - medZ;
-    double BZ = (B.z + Z) - medZ;
-    double CZ = (C.z + Z) - medZ;
-    double DZ = (D.z + Z) - medZ;
+    List <Point3D> dotsA = [];
+    List <Point3D> dotsOA = [];
+    for (int i = 0; i < dotsCount; i++){
+      dotsA.add(Point3D(dots[i].x + X - medX, dots[i].y + Y - medY, dots[i].z + Z - medZ));
+      dotsOA.add(Point3D(0,0,0));
+    }
 
-    double OAX;
-    double OBX;
-    double OCX;
-    double ODX;
-    double OAY;
-    double OBY;
-    double OCY;
-    double ODY;
-    double OAZ;
-    double OBZ;
-    double OCZ;
-    double ODZ;
 
     // X axis turn
+    for (int i = 0; i < dotsCount; i++){
+      dotsOA[i] = (Point3D(
+          dotsA[i].x,
+          dotsA[i].y * cos(axisX) + dotsA[i].z * (sin(axisX)),
+          dotsA[i].z * cos(axisX) - dotsA[i].y * sin(axisX))
+      );
+    }
+    for (int i = 0; i < dotsCount; i++){
+      dotsA[i] = dotsOA[i];
+    }
+/*
     OAX = (AX);
     OBX = (BX);
     OCX = (CX);
@@ -127,7 +132,20 @@ class Shapes {
     CZ = OCZ;
     DZ = ODZ;
 
+ */
+
     //Y axis turn
+    for (int i = 0; i < dotsCount; i++){
+      dotsOA[i] = (Point3D(
+          dotsA[i].x * cos(axisY) + dotsA[i].z * sin(axisY),
+          dotsA[i].y,
+          dotsA[i].z * cos(axisY) - dotsA[i].x * sin(axisY))
+      );
+    }
+    for (int i = 0; i < dotsCount; i++){
+      dotsA[i] = dotsOA[i];
+    }
+/*
     OAX = (AX) * cos(axisY) + (AZ) * sin(axisY);
     OBX = (BX) * cos(axisY) + (BZ) * sin(axisY);
     OCX = (CX) * cos(axisY) + (CZ) * sin(axisY);
@@ -156,7 +174,20 @@ class Shapes {
     CZ = OCZ;
     DZ = ODZ;
 
+ */
+
     //Z axis turn
+    for (int i = 0; i < dotsCount; i++){
+      dotsOA[i] = (Point3D(
+          dotsA[i].x * cos(axisZ) - dotsA[i].y * sin(axisZ),
+          dotsA[i].y * cos(axisZ) + dotsA[i].x * sin(axisZ),
+          dotsA[i].z)
+      );
+    }
+    for (int i = 0; i < dotsCount; i++){
+      dotsA[i] = dotsOA[i];
+    }
+/*
     OAX = (AX) * cos(axisZ) - (AY) * sin(axisZ);
     OBX = (BX) * cos(axisZ) - (BY) * sin(axisZ);
     OCX = (CX) * cos(axisZ) - (CY) * sin(axisZ);
@@ -185,13 +216,22 @@ class Shapes {
     CZ = OCZ;
     DZ = ODZ;
 
+ */
+
     List <ZShape> planes = [];
-    ZShape plane = ZShape(path: [
-      ZMove.only(x: AX + medX, y: AY + medY, z: AZ + medZ ),
-      ZLine.only(x: BX + medX, y: BY + medY, z: BZ + medZ ),
-      ZLine.only(x: CX + medX, y: CY + medY, z: CZ + medZ ),
-      ZLine.only(x: DX + medX, y: DY + medY, z: DZ + medZ ),
-    ], closed: true, stroke: 1, fill: filling, color: Colors.blue);
+
+    List<ZPathCommand> minipath;
+    minipath.add(ZMove.only(x: dotsA[0].x + medX, y: dotsA[0].y + medY, z: dotsA[0].z + medZ));
+    for (int i = 1; i < dotsCount; i++){
+      minipath.add(ZLine.only( x: dotsA[i].x + medX, y: dotsA[i].y + medY, z: dotsA[i].z + medZ  ));
+    }
+
+
+    ZShape plane = ZShape(path: minipath,
+        closed: true,
+        stroke: 1,
+        fill: filling,
+        color: Colors.blue);
     planes.add(plane);
     return planes;
   }
